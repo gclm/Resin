@@ -185,7 +185,9 @@ func (s *inboundDemuxServer) handleAcceptedConn(conn net.Conn) {
 		return
 	}
 
-	s.untrackActiveConn(conn)
+	httpConn = newCloseHookConn(httpConn, func() {
+		s.untrackActiveConn(conn)
+	})
 	if err := s.httpListener.Enqueue(httpConn); err != nil {
 		_ = httpConn.Close()
 	}
@@ -254,6 +256,7 @@ func (s *inboundDemuxServer) closeSniffConns() {
 	for conn := range s.sniffConns {
 		conns = append(conns, conn)
 	}
+	s.sniffConns = make(map[net.Conn]struct{})
 	s.mu.Unlock()
 
 	for _, conn := range conns {
@@ -267,6 +270,7 @@ func (s *inboundDemuxServer) closeActiveConns() {
 	for conn := range s.activeConns {
 		conns = append(conns, conn)
 	}
+	s.activeConns = make(map[net.Conn]struct{})
 	s.mu.Unlock()
 
 	for _, conn := range conns {
@@ -360,6 +364,13 @@ type prebufferedConn struct {
 	reader io.Reader
 }
 
+type closeHookConn struct {
+	net.Conn
+	onClose   func()
+	closeOnce sync.Once
+	closeErr  error
+}
+
 func newPrebufferedConn(conn net.Conn, reader *bufio.Reader) (net.Conn, error) {
 	if conn == nil || reader == nil || reader.Buffered() == 0 {
 		return conn, nil
@@ -382,21 +393,72 @@ func (c *prebufferedConn) Read(p []byte) (int, error) {
 }
 
 func (c *prebufferedConn) CloseWrite() error {
+	if c == nil {
+		return net.ErrClosed
+	}
+	return closeWriteErr(c.Conn)
+}
+
+func (c *prebufferedConn) CloseRead() error {
+	if c == nil {
+		return net.ErrClosed
+	}
+	return closeReadErr(c.Conn)
+}
+
+func newCloseHookConn(conn net.Conn, onClose func()) net.Conn {
+	if conn == nil || onClose == nil {
+		return conn
+	}
+	return &closeHookConn{
+		Conn:    conn,
+		onClose: onClose,
+	}
+}
+
+func (c *closeHookConn) Close() error {
 	if c == nil || c.Conn == nil {
 		return net.ErrClosed
 	}
-	closeWriter, ok := c.Conn.(interface{ CloseWrite() error })
+	c.closeOnce.Do(func() {
+		c.closeErr = c.Conn.Close()
+		if c.onClose != nil {
+			c.onClose()
+		}
+	})
+	return c.closeErr
+}
+
+func (c *closeHookConn) CloseWrite() error {
+	if c == nil {
+		return net.ErrClosed
+	}
+	return closeWriteErr(c.Conn)
+}
+
+func (c *closeHookConn) CloseRead() error {
+	if c == nil {
+		return net.ErrClosed
+	}
+	return closeReadErr(c.Conn)
+}
+
+func closeWriteErr(conn net.Conn) error {
+	if conn == nil {
+		return net.ErrClosed
+	}
+	closeWriter, ok := conn.(interface{ CloseWrite() error })
 	if !ok {
 		return errHalfCloseUnsupported
 	}
 	return closeWriter.CloseWrite()
 }
 
-func (c *prebufferedConn) CloseRead() error {
-	if c == nil || c.Conn == nil {
+func closeReadErr(conn net.Conn) error {
+	if conn == nil {
 		return net.ErrClosed
 	}
-	closeReader, ok := c.Conn.(interface{ CloseRead() error })
+	closeReader, ok := conn.(interface{ CloseRead() error })
 	if !ok {
 		return errHalfCloseUnsupported
 	}

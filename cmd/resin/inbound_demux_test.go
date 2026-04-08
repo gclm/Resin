@@ -439,6 +439,83 @@ func TestInboundDemux_ShutdownUnblocksSocksHandshakePhase(t *testing.T) {
 	}
 }
 
+func TestInboundDemux_ShutdownTimeoutForceClosesActiveHTTPConnections(t *testing.T) {
+	handlerStarted := make(chan struct{})
+	handlerRelease := make(chan struct{})
+	httpServer := &http.Server{
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			close(handlerStarted)
+			select {
+			case <-handlerRelease:
+			case <-r.Context().Done():
+			}
+		}),
+	}
+
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("listen: %v", err)
+	}
+
+	demux := newInboundDemuxServer(httpServer, &stubSocksHandler{})
+	errCh := make(chan error, 1)
+	go func() {
+		errCh <- demux.Serve(ln)
+	}()
+
+	clientConn, err := net.Dial("tcp", ln.Addr().String())
+	if err != nil {
+		t.Fatalf("dial http conn: %v", err)
+	}
+	defer clientConn.Close()
+	defer close(handlerRelease)
+
+	if _, err := io.WriteString(clientConn, "GET /hang HTTP/1.1\r\nHost: test\r\n\r\n"); err != nil {
+		t.Fatalf("write hanging http request: %v", err)
+	}
+
+	select {
+	case <-handlerStarted:
+	case <-time.After(time.Second):
+		t.Fatal("expected HTTP handler to start")
+	}
+
+	waitForDemuxConnState(t, demux, 1, 0)
+
+	shutdownDone := make(chan error, 1)
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+		defer cancel()
+		shutdownDone <- demux.Shutdown(ctx)
+	}()
+
+	select {
+	case err := <-shutdownDone:
+		if !errors.Is(err, context.DeadlineExceeded) {
+			t.Fatalf("shutdown: got %v, want %v", err, context.DeadlineExceeded)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("shutdown did not return after timeout")
+	}
+
+	_ = clientConn.SetReadDeadline(time.Now().Add(time.Second))
+	buf := make([]byte, 1)
+	if _, err := clientConn.Read(buf); !errors.Is(err, io.EOF) {
+		t.Fatalf("active HTTP conn should be force-closed after shutdown timeout, got %v", err)
+	}
+
+	waitForDemuxConnState(t, demux, 0, 0)
+
+	select {
+	case err := <-errCh:
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			t.Fatalf("serve error: %v", err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("timed out waiting for demux server to stop")
+	}
+}
+
 func TestPrebufferedConn_ForwardsHalfClose(t *testing.T) {
 	base := &demuxHalfCloseConn{}
 	reader := bufio.NewReader(strings.NewReader("prefetched"))
