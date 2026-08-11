@@ -1,0 +1,451 @@
+# Instincts generated from https://github.com/gclm/Resin
+# Generated: 2026-07-05T08:42:01.250Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: Resin-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/gclm/Resin
+---
+
+# Resin Commit Length
+
+## Action
+
+Keep commit messages concise (~43 characters)
+
+## Evidence
+
+- Average commit message length: 43 chars
+- Based on 7 commits
+
+---
+id: Resin-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/gclm/Resin
+---
+
+# Resin Naming Files
+
+## Action
+
+Use camelCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: camelCase
+
+---
+id: Resin-import-relative
+trigger: "when importing modules"
+confidence: 0.75
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/gclm/Resin
+---
+
+# Resin Import Relative
+
+## Action
+
+Use relative imports for project files
+
+## Evidence
+
+- Import analysis shows relative import pattern
+- Example: import { x } from '../lib/x'
+
+---
+id: Resin-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/gclm/Resin
+---
+
+# Resin Export Style
+
+## Action
+
+Prefer named exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: named
+
+---
+id: Resin-arch-feature-based
+trigger: "when adding a new feature"
+confidence: 0.85
+domain: architecture
+source: repo-analysis
+source_repo: https://github.com/gclm/Resin
+---
+
+# Resin Arch Feature Based
+
+## Action
+
+Create a new folder in src/features/ with all related code colocated
+
+## Evidence
+
+- Feature-based module organization detected
+- Structure: src/features/[feature-name]/
+
+---
+id: Resin-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/gclm/Resin
+---
+
+# Resin Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: Resin-workflow-feature-development-with-schema-and-ui-update
+trigger: "when doing feature development with schema and ui update"
+confidence: 0.55
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/gclm/Resin
+---
+
+# Resin Workflow Feature Development With Schema And Ui Update
+
+## Action
+
+Follow the feature-development-with-schema-and-ui-update workflow:
+1. Update backend schema and repository logic (e.g., add column to schema, migrate databases).
+2. Update backend logic and API handlers to support the new field.
+3. Update or add backend and API contract tests.
+4. Expose the new field in API responses.
+5. Update UI components and types to display the new field.
+6. Update UI translations if necessary.
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~1x per month
+- Files: internal/requestlog/schema.go, internal/requestlog/repo.go, internal/api/handler_requestlog.go
+
+---
+id: Resin-workflow-feature-development-ui-api
+trigger: "when doing feature development ui api"
+confidence: 0.55
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/gclm/Resin
+---
+
+# Resin Workflow Feature Development Ui Api
+
+## Action
+
+Follow the feature-development-ui-api workflow:
+1. Create or update UI components for the new feature.
+2. Update or add API client logic and types for the new feature.
+3. Update translations and styles as needed.
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~1x per month
+- Files: webui/src/features/platforms/PlatformDetailPage.tsx, webui/src/features/platforms/PlatformMonitorPanel.tsx, webui/src/features/platforms/api.ts
+
+---
+id: Resin-workflow-documentation-update-after-feature
+trigger: "when doing documentation update after feature"
+confidence: 0.55
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/gclm/Resin
+---
+
+# Resin Workflow Documentation Update After Feature
+
+## Action
+
+Follow the documentation-update-after-feature workflow:
+1. Update DESIGN.md or other documentation files to describe the new feature or field.
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~1x per month
+- Files: DESIGN.md
+
+---
+id: resin-instinct-file-naming
+trigger: "When creating a new file in the codebase"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: gclm/Resin
+---
+
+# Resin Instinct File Naming
+
+## Action
+
+Name the file using camelCase (e.g., requestLogHandler.go)
+
+## Evidence
+
+- Pattern in files: internal/requestlog/schema.go, webui/src/features/requestLogs/RequestLogsPage.tsx
+
+---
+id: resin-instinct-function-naming
+trigger: "When defining a new function"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: gclm/Resin
+---
+
+# Resin Instinct Function Naming
+
+## Action
+
+Name the function using camelCase (e.g., getRequestLog)
+
+## Evidence
+
+- Pattern in Go code: schema.go, repo.go
+
+---
+id: resin-instinct-class-naming
+trigger: "When defining a new class or struct"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: gclm/Resin
+---
+
+# Resin Instinct Class Naming
+
+## Action
+
+Name the class/struct using PascalCase (e.g., RequestLogEntry)
+
+## Evidence
+
+- Pattern in Go code: schema.go
+
+---
+id: resin-instinct-constant-naming
+trigger: "When defining a new constant"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: gclm/Resin
+---
+
+# Resin Instinct Constant Naming
+
+## Action
+
+Name the constant using SCREAMING_SNAKE_CASE (e.g., MAX_RETRIES)
+
+## Evidence
+
+- Pattern in Go code: schema.go
+
+---
+id: resin-instinct-import-style
+trigger: "When importing modules in Go code"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: gclm/Resin
+---
+
+# Resin Instinct Import Style
+
+## Action
+
+Use relative imports
+
+## Evidence
+
+- Pattern in Go files: internal/requestlog/schema.go
+
+---
+id: resin-instinct-export-style
+trigger: "When exporting functions or types"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: gclm/Resin
+---
+
+# Resin Instinct Export Style
+
+## Action
+
+Use named exports
+
+## Evidence
+
+- Pattern in TypeScript files: webui/src/features/requestLogs/types.ts
+
+---
+id: resin-instinct-test-location
+trigger: "When adding tests for backend Go code"
+confidence: 0.85
+domain: testing
+source: repo-analysis
+source_repo: gclm/Resin
+---
+
+# Resin Instinct Test Location
+
+## Action
+
+Place tests in separate files with _test.go suffix in the same package directory
+
+## Evidence
+
+- Pattern in files: internal/requestlog/repo_service_test.go, internal/api/contract_test.go
+
+---
+id: resin-instinct-test-type
+trigger: "When testing API handlers or repository logic"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: gclm/Resin
+---
+
+# Resin Instinct Test Type
+
+## Action
+
+Write contract tests for API and service tests for repository logic
+
+## Evidence
+
+- Pattern in files: internal/api/contract_test.go, internal/requestlog/repo_service_test.go
+
+---
+id: resin-instinct-commit-prefix
+trigger: "When writing a commit message for a feature or documentation change"
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: gclm/Resin
+---
+
+# Resin Instinct Commit Prefix
+
+## Action
+
+Prefix the commit message with 'feat' for features or 'docs' for documentation (e.g., feat(requestlog): ...)
+
+## Evidence
+
+- Seen in commit: feat(requestlog): record first-byte latency telemetry
+- Seen in commit: docs(requestlog): document first-byte latency field
+
+---
+id: resin-instinct-commit-length
+trigger: "When writing a commit message"
+confidence: 0.7
+domain: git
+source: repo-analysis
+source_repo: gclm/Resin
+---
+
+# Resin Instinct Commit Length
+
+## Action
+
+Keep the commit message concise, averaging around 43 characters
+
+## Evidence
+
+- Average commit length: 43
+- Examples: feat(requestlog): record first-byte latency telemetry
+
+---
+id: resin-instinct-feature-schema-ui
+trigger: "When adding a new field or metric to a core entity to expose via API and UI"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: gclm/Resin
+---
+
+# Resin Instinct Feature Schema Ui
+
+## Action
+
+Update backend schema, repository logic, API handlers, contract tests, API responses, UI components/types, and UI translations as needed
+
+## Evidence
+
+- Workflow: feature-development-with-schema-and-ui-update
+- Files: internal/requestlog/schema.go, internal/requestlog/repo.go, internal/api/handler_requestlog.go, internal/api/contract_test.go, internal/requestlog/repo_service_test.go, webui/src/features/requestLogs/RequestLogsPage.tsx, webui/src/features/requestLogs/types.ts, webui/src/i18n/translations.ts
+
+---
+id: resin-instinct-feature-ui-api
+trigger: "When adding a new UI feature that interacts with the backend"
+confidence: 0.85
+domain: workflow
+source: repo-analysis
+source_repo: gclm/Resin
+---
+
+# Resin Instinct Feature Ui Api
+
+## Action
+
+Create or update UI components, update/add API client logic and types, and update translations/styles as needed
+
+## Evidence
+
+- Workflow: feature-development-ui-api
+- Files: webui/src/features/platforms/PlatformDetailPage.tsx, webui/src/features/platforms/PlatformMonitorPanel.tsx, webui/src/features/platforms/api.ts, webui/src/features/platforms/types.ts, webui/src/i18n/translations.ts, webui/src/styles/theme.css
+
+---
+id: resin-instinct-docs-after-feature
+trigger: "When a new feature or field is added"
+confidence: 0.85
+domain: workflow
+source: repo-analysis
+source_repo: gclm/Resin
+---
+
+# Resin Instinct Docs After Feature
+
+## Action
+
+Update DESIGN.md or relevant documentation to describe the new feature or field
+
+## Evidence
+
+- Workflow: documentation-update-after-feature
+- File: DESIGN.md
+
